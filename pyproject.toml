@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aoclib"
+description = "Advent of Code"
+keywords = ["aoc"]
+version = "0.0.1"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+test = [
+  "coverage",
+  "mypy",
+  "pre-commit",
+  "pytest",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+    "y20*",
+]
+python_files = [
+    "test_*.py",
+    "main.py",
+]
