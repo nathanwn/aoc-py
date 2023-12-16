@@ -11,41 +11,10 @@ from typing import NamedTuple
 
 import pytest
 
+from aoclib.grid2d import Di4, Pos, State
 from aoclib.util import read_file
 
-
-class Direction(Enum):
-    U = "U"
-    D = "D"
-    L = "L"
-    R = "R"
-
-
-class Position(NamedTuple):
-    r: int
-    c: int
-
-    def inside(self, g: list[str]) -> bool:
-        return 0 <= self.r < len(g) and 0 <= self.c < len(g[0])
-
-    def go(self, d: Direction) -> Position:
-        if d == Direction.U:
-            return Position(self.r - 1, self.c)
-        if d == Direction.D:
-            return Position(self.r + 1, self.c)
-        if d == Direction.L:
-            return Position(self.r, self.c - 1)
-        if d == Direction.R:
-            return Position(self.r, self.c + 1)
-        assert False
-
-
-class State(NamedTuple):
-    dir: Direction
-    pos: Position
-
-
-Visited = list[list[dict[Direction, bool]]]
+Visited = list[list[dict[Di4, bool]]]
 
 
 def compute(g: list[str], s: State) -> int:
@@ -68,32 +37,32 @@ def compute(g: list[str], s: State) -> int:
             q.put(State(dir=d, pos=p.go(d)))
         elif cell == "/":
             m = {
-                Direction.U: Direction.R,
-                Direction.L: Direction.D,
-                Direction.R: Direction.U,
-                Direction.D: Direction.L,
+                Di4.U: Di4.R,
+                Di4.L: Di4.D,
+                Di4.R: Di4.U,
+                Di4.D: Di4.L,
             }
             d = m[d]
             q.put(State(dir=d, pos=p.go(d)))
         elif cell == "\\":
             m = {
-                Direction.U: Direction.L,
-                Direction.L: Direction.U,
-                Direction.R: Direction.D,
-                Direction.D: Direction.R,
+                Di4.U: Di4.L,
+                Di4.L: Di4.U,
+                Di4.R: Di4.D,
+                Di4.D: Di4.R,
             }
             d = m[d]
             q.put(State(dir=d, pos=p.go(d)))
         elif cell == "|":
-            if d not in [Direction.U, Direction.D]:
-                q.put(State(dir=Direction.U, pos=Position(p.r - 1, p.c)))
-                q.put(State(dir=Direction.D, pos=Position(p.r + 1, p.c)))
+            if d not in [Di4.U, Di4.D]:
+                q.put(State(dir=Di4.U, pos=Pos(p.r - 1, p.c)))
+                q.put(State(dir=Di4.D, pos=Pos(p.r + 1, p.c)))
             else:
                 q.put(State(dir=d, pos=p.go(d)))
         elif cell == "-":
-            if d not in [Direction.L, Direction.R]:
-                q.put(State(dir=Direction.L, pos=Position(p.r, p.c - 1)))
-                q.put(State(dir=Direction.R, pos=Position(p.r, p.c + 1)))
+            if d not in [Di4.L, Di4.R]:
+                q.put(State(dir=Di4.L, pos=Pos(p.r, p.c - 1)))
+                q.put(State(dir=Di4.R, pos=Pos(p.r, p.c + 1)))
             else:
                 q.put(State(dir=d, pos=p.go(d)))
         else:
@@ -115,7 +84,7 @@ def compute(g: list[str], s: State) -> int:
 
 def part1(input: str) -> int:
     g = input.splitlines()
-    s = State(dir=Direction.R, pos=Position(0, 0))
+    s = State(dir=Di4.R, pos=Pos(0, 0))
     ans = compute(g, s)
     return ans
 
@@ -126,32 +95,32 @@ def part2(input: str) -> int:
 
     for c in range(len(g[0])):
         r = 0
-        p = Position(r, c)
-        s = State(dir=Direction.D, pos=p)
+        p = Pos(r, c)
+        s = State(dir=Di4.D, pos=p)
         res = compute(g, s)
         print(f"{r=} {c=} {res=}", file=sys.stderr)
         ans = max(ans, res)
 
     for c in range(len(g[0])):
         r = len(g) - 1
-        p = Position(r, c)
-        s = State(dir=Direction.U, pos=p)
+        p = Pos(r, c)
+        s = State(dir=Di4.U, pos=p)
         res = compute(g, s)
         print(f"{r=} {c=} {res=}", file=sys.stderr)
         ans = max(ans, res)
 
     for r in range(len(g)):
         c = 0
-        p = Position(r, c)
-        s = State(dir=Direction.R, pos=p)
+        p = Pos(r, c)
+        s = State(dir=Di4.R, pos=p)
         res = compute(g, s)
         print(f"{r=} {c=} {res=}", file=sys.stderr)
         ans = max(ans, res)
 
     for r in range(len(g)):
         c = len(g[0]) - 1
-        p = Position(r, c)
-        s = State(dir=Direction.L, pos=p)
+        p = Pos(r, c)
+        s = State(dir=Di4.L, pos=p)
         res = compute(g, s)
         print(f"{r=} {c=} {res=}", file=sys.stderr)
         ans = max(ans, res)
