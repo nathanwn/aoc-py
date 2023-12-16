@@ -43,7 +43,7 @@ def gcd(a: int, b: int) -> int:
     return a
 
 
-def lcd(a: int, b: int) -> int:
+def lcm(a: int, b: int) -> int:
     return a // gcd(a, b) * b
 
 
@@ -88,7 +88,7 @@ def part2(input: str) -> int:
         )
         for source in sources
     ]
-    return reduce(lcd, steps, 1)
+    return reduce(lcm, steps, 1)
 
 
 def main():
