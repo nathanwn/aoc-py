@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from enum import Enum
+from enum import IntEnum
 from typing import NamedTuple
 
 
-class Di4(Enum):
-    U = "U"
-    D = "D"
-    L = "L"
-    R = "R"
+class Di4(IntEnum):
+    U = 0
+    D = 1
+    L = 2
+    R = 3
 
 
 class Pos(NamedTuple):

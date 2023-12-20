@@ -3,80 +3,92 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from collections import defaultdict
+from collections import deque
 from collections.abc import Callable
-from enum import Enum
-from queue import Queue
-from typing import NamedTuple
 
 import pytest
 
 from aoclib.grid2d import Di4, Pos, State
 from aoclib.util import read_file
 
-Visited = list[list[dict[Di4, bool]]]
+Visited = list[list[list[bool]]]
+
+
+def get_next_states(u: State, ch: str) -> list[State]:
+    next_states = []
+    p = u.pos
+    d = u.dir
+
+    if ch == ".":
+        next_states.append(State(dir=d, pos=p.go(d)))
+    elif ch == "/":
+        m = {
+            Di4.U: Di4.R,
+            Di4.L: Di4.D,
+            Di4.R: Di4.U,
+            Di4.D: Di4.L,
+        }
+        d = m[d]
+        next_states.append(State(dir=d, pos=p.go(d)))
+    elif ch == "\\":
+        m = {
+            Di4.U: Di4.L,
+            Di4.L: Di4.U,
+            Di4.R: Di4.D,
+            Di4.D: Di4.R,
+        }
+        d = m[d]
+        next_states.append(State(dir=d, pos=p.go(d)))
+    elif ch == "|":
+        if d not in [Di4.U, Di4.D]:
+            next_states.append(State(dir=Di4.U, pos=Pos(p.r - 1, p.c)))
+            next_states.append(State(dir=Di4.D, pos=Pos(p.r + 1, p.c)))
+        else:
+            next_states.append(State(dir=d, pos=p.go(d)))
+    elif ch == "-":
+        if d not in [Di4.L, Di4.R]:
+            next_states.append(State(dir=Di4.L, pos=Pos(p.r, p.c - 1)))
+            next_states.append(State(dir=Di4.R, pos=Pos(p.r, p.c + 1)))
+        else:
+            next_states.append(State(dir=d, pos=p.go(d)))
+    else:
+        assert False
+
+    return next_states
 
 
 def compute(g: list[str], s: State) -> int:
     visited: Visited = [
-        [defaultdict(bool) for j in range(len(g[0]))] for i in range(len(g))
+        [[False for d in range(len(Di4))] for j in range(len(g[0]))]
+        for i in range(len(g))
     ]
-    q: Queue[State] = Queue()
-    q.put(s)
+    q: deque[State] = deque()
+    q.append(s)
+    visited[s.pos.r][s.pos.c][s.dir] = True
 
-    while not q.empty():
-        u = q.get()
-        p = u.pos
-        d = u.dir
-        if (not p.inside(g)) or visited[p.r][p.c][d]:
-            continue
+    while len(q) > 0:
+        u = q.popleft()
+        ch = g[u.pos.r][u.pos.c]
+        next_states = get_next_states(u, ch)
 
-        visited[p.r][p.c][d] = True
-        cell = g[p.r][p.c]
-        if cell == ".":
-            q.put(State(dir=d, pos=p.go(d)))
-        elif cell == "/":
-            m = {
-                Di4.U: Di4.R,
-                Di4.L: Di4.D,
-                Di4.R: Di4.U,
-                Di4.D: Di4.L,
-            }
-            d = m[d]
-            q.put(State(dir=d, pos=p.go(d)))
-        elif cell == "\\":
-            m = {
-                Di4.U: Di4.L,
-                Di4.L: Di4.U,
-                Di4.R: Di4.D,
-                Di4.D: Di4.R,
-            }
-            d = m[d]
-            q.put(State(dir=d, pos=p.go(d)))
-        elif cell == "|":
-            if d not in [Di4.U, Di4.D]:
-                q.put(State(dir=Di4.U, pos=Pos(p.r - 1, p.c)))
-                q.put(State(dir=Di4.D, pos=Pos(p.r + 1, p.c)))
-            else:
-                q.put(State(dir=d, pos=p.go(d)))
-        elif cell == "-":
-            if d not in [Di4.L, Di4.R]:
-                q.put(State(dir=Di4.L, pos=Pos(p.r, p.c - 1)))
-                q.put(State(dir=Di4.R, pos=Pos(p.r, p.c + 1)))
-            else:
-                q.put(State(dir=d, pos=p.go(d)))
-        else:
-            assert False
+        for v in next_states:
+            if (not v.pos.inside(g)) or visited[v.pos.r][v.pos.c][v.dir]:
+                continue
+            q.append(v)
+            visited[v.pos.r][v.pos.c][v.dir] = True
 
     energized = [
-        ["#" if True in visited[i][j].values() else "." for j in range(len(g[0]))]
+        [
+            "#" if any(visited[i][j][d] for d in range(len(Di4))) else "."
+            for j in range(len(g[0]))
+        ]
         for i in range(len(g))
     ]
 
     ans = 0
     for row in energized:
-        for cell in row:
-            if cell == "#":
+        for ch in row:
+            if ch == "#":
                 ans += 1
 
     return ans
