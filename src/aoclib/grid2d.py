@@ -30,6 +30,9 @@ class Pos(NamedTuple):
             return Pos(self.r, self.c + 1)
         assert False
 
+    def manhattan(self, other: Pos) -> int:
+        return abs(self.r - other.r) + abs(self.c - other.c)
+
 
 class State(NamedTuple):
     pos: Pos
