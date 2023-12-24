@@ -2,8 +2,8 @@ from random import randint
 
 chars = [".", ".", ".", "-", "/", "\\", "|"]
 
-m = randint(2, 5)
-n = randint(2, 5)
+m = randint(2, 3)
+n = randint(2, 3)
 
 g = []
 
