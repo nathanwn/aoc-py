@@ -92,21 +92,5 @@ class Rational:
     def __ge__(self, other: object) -> bool:
         return self > other or self == other
 
-    # def __req__(self, other: object) -> bool:
-    #     if isinstance(other, int):
-    #         return Rational(num=other, den=1) == self
-    #     return other == self
-
-    # def __rlt__(self, other: object) -> bool:
-    #     if isinstance(other, int):
-    #         return Rational(num=other, den=1) < self
-    #     return other < self
-
-    # def __rgt__(self, other: object) -> bool:
-    #     return self < other
-
-    # def __rle__(self, other: object) -> bool:
-    #     return other < self or other == self
-
     def inverse(self) -> Rational:
         return Rational(num=self.den, den=self.num)
