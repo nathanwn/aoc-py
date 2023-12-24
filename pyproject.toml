@@ -8,6 +8,9 @@ description = "Advent of Code"
 keywords = ["aoc"]
 version = "0.0.1"
 requires-python = ">=3.10"
+dependencies = [
+    "z3-solver",
+]
 
 [project.optional-dependencies]
 test = [

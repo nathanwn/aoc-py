@@ -112,4 +112,4 @@ def test(solver: Callable[[str], int], file: str, ans: int) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    SystemExit(main())

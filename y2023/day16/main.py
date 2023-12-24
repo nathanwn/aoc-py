@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import itertools
 import os
-import pprint
 from collections import defaultdict, deque
 from collections.abc import Callable
 
@@ -452,4 +451,4 @@ def test(solver: Callable[[str], int], file: str, ans: int) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    SystemExit(main())
