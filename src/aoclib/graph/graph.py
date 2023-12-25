@@ -3,6 +3,16 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 
+class UndiGraph:
+    def __init__(self, n: int) -> None:
+        self.n = n
+        self.adj: list[list[int]] = [[] for _ in range(n)]
+
+    def add_edge(self, u: int, v: int) -> None:
+        self.adj[u].append(v)
+        self.adj[v].append(u)
+
+
 class DiGraph:
     def __init__(self, n: int) -> None:
         self.n = n
