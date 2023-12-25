@@ -9,6 +9,7 @@ from collections.abc import Callable, Sequence
 
 import pytest
 
+from aoclib.flow.dinic import Dinic
 from aoclib.graph.bridge import find_bridges
 from aoclib.graph.graph import UndiGraph
 from aoclib.structures.dsu import DSU
@@ -23,6 +24,58 @@ def parse_line(line: str) -> tuple[str, Sequence[str]]:
 
 
 def part1(input: str) -> int:
+    # Running this with pypy3 took about 30 mins
+    nodes: dict[str, int] = {}
+    node_label: list[str] = []
+    n = 0
+
+    edges = []
+
+    for line in input.splitlines():
+        su, svs = parse_line(line)
+        if su not in nodes:
+            nodes[su] = n
+            n += 1
+            node_label.append(su)
+        u = nodes[su]
+
+        for sv in svs:
+            if sv not in nodes:
+                nodes[sv] = n
+                n += 1
+                node_label.append(sv)
+            v = nodes[sv]
+            if u < v:
+                edges.append((u, v))
+            else:
+                edges.append((v, u))
+
+    g = UndiGraph(n)
+
+    for u, v in edges:
+        g.add_edge(u, v)
+
+    for s in range(n):
+        for t in range(n):
+            if s == t:
+                continue
+
+            dinic = Dinic(n=n, s=s, t=t)
+
+            for u in range(g.n):
+                for v in g.adj[u]:
+                    dinic.add_edge(u, v, 1)
+
+            max_flow = dinic.max_flow()
+            if max_flow == 3:
+                k = len(dinic.get_min_cut())
+                ans = k * (n - k)
+                return ans
+
+    assert False
+
+
+def part1_slow(input: str) -> int:
     # Running this with pypy3 took about 30 mins
     nodes: dict[str, int] = {}
     node_label: list[str] = []
@@ -118,6 +171,7 @@ def main():
     ("solver", "file", "ans"),
     [
         (part1, "sample.txt", 54),
+        (part1, "input.txt", 551196),
         # (part2, "sample.txt", -1),
     ],
 )
