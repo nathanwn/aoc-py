@@ -200,10 +200,12 @@ def main():
     parser.add_argument("part", choices=["1", "2"])
     parser.add_argument("input_file")
 
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except SystemExit:
+        return 1
 
-    with open(args.input_file, encoding="utf-8") as f:
-        input = f.read().strip()
+    input = read_file(args.input_file)
 
     if args.part == "1":
         print(f"Part 1: {part1(input)}")

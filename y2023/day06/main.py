@@ -112,7 +112,11 @@ def main():
     parser.add_argument("part", choices=["1", "2"])
     parser.add_argument("input_file")
 
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except SystemExit:
+        return 1
+
     input = read_file(args.input_file)
 
     if args.part == "1":
