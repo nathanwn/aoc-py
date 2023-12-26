@@ -12,6 +12,28 @@ class Di4(IntEnum):
     R = 3
 
 
+def turn_left(d: Di4) -> Di4:
+    if d == Di4.U:
+        return Di4.L
+    elif d == Di4.L:
+        return Di4.D
+    elif d == Di4.D:
+        return Di4.R
+    else:
+        return Di4.U
+
+
+def turn_right(d: Di4) -> Di4:
+    if d == Di4.U:
+        return Di4.R
+    elif d == Di4.R:
+        return Di4.D
+    elif d == Di4.D:
+        return Di4.L
+    else:
+        return Di4.U
+
+
 class Pos(NamedTuple):
     r: int
     c: int
@@ -37,3 +59,14 @@ class Pos(NamedTuple):
 class State(NamedTuple):
     pos: Pos
     dir: Di4
+
+    def __repr__(self) -> str:
+        return f"State(pos={tuple(self.pos)},dir={Di4(self.dir).name})"
+
+
+def parse_grid(input: str) -> list[list[str]]:
+    return [[c for c in line] for line in input.splitlines()]
+
+
+def format_grid(g: list[list[str]]):
+    return "\n".join(["".join([c for c in line]) for line in g])

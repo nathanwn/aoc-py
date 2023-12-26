@@ -6,6 +6,7 @@ from collections.abc import Callable
 
 import pytest
 
+from aoclib.grid2d import format_grid
 from aoclib.util import read_file
 
 
@@ -61,8 +62,7 @@ def tilt_east(g: list[list[str]]) -> None:
                     g[i][k - 1], g[i][k] = g[i][k], g[i][k - 1]
 
 
-def txt(g: list[list[str]]) -> str:
-    return "\n".join(["".join([c for c in line]) for line in g])
+txt = format_grid
 
 
 def calc(g: list[list[str]]) -> int:
