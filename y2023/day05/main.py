@@ -7,32 +7,15 @@ from typing import NamedTuple
 
 import pytest
 
+from aoclib.int_range import IntRange
 from aoclib.util import read_file
 
 
-class IntRange(NamedTuple):
-    start: int
-    len: int
-
-    @property
-    def end(self) -> int:
-        return self.start + self.len - 1
-
-    def contains(self, val: int) -> bool:
-        return self.start <= val < self.start + self.len
-
-    def get_gap_range(self, them: IntRange) -> IntRange | None:
-        new_len = them.start - self.end - 1
-        if new_len <= 0:
-            return None
-        return IntRange(self.end + 1, new_len)
-
-    def get_overlapping(self, them: IntRange) -> IntRange | None:
-        if them.end < self.start or self.end < them.start:
-            return None
-        new_start = max(self.start, them.start)
-        new_end = min(self.end, them.end)
-        return IntRange(new_start, new_end - new_start + 1)
+def get_gap_range(this: IntRange, that: IntRange) -> IntRange | None:
+    new_len = that.low - this.high - 1
+    if new_len <= 0:
+        return None
+    return IntRange.from_len(this.high + 1, new_len)
 
 
 class MapOp(NamedTuple):
@@ -43,10 +26,10 @@ class MapOp(NamedTuple):
         return self.src_range.contains(seed)
 
     def map_val(self, val: int) -> int:
-        return val - self.src_range.start + self.dest_start
+        return val - self.src_range.low + self.dest_start
 
     def map_range(self, int_range: IntRange) -> IntRange:
-        return IntRange(self.map_val(int_range.start), int_range.len)
+        return IntRange.from_len(self.map_val(int_range.low), int_range.len)
 
 
 def parse_seeds(seed_line: str) -> list[int]:
@@ -60,7 +43,7 @@ def parse_seed_ranges(seed_line: str) -> list[IntRange]:
     vals = list(map(int, seeds_part.split()))
     res = []
     for i in range(0, len(vals), 2):
-        res.append(IntRange(vals[i], vals[i + 1]))
+        res.append(IntRange.from_len(vals[i], vals[i + 1]))
     return res
 
 
@@ -74,8 +57,10 @@ def parse_map_layers(parts: list[str]) -> list[list[MapOp]]:
         layer = []
         for range_line in range_lines:
             line_parts = list(map(int, range_line.split()))
-            layer.append(MapOp(line_parts[0], IntRange(line_parts[1], line_parts[2])))
-        layer.sort(key=lambda map_op: map_op.src_range.start)
+            layer.append(
+                MapOp(line_parts[0], IntRange.from_len(line_parts[1], line_parts[2]))
+            )
+        layer.sort(key=lambda map_op: map_op.src_range.low)
         layers.append(layer)
 
     return layers
@@ -98,13 +83,13 @@ def apply_layer_to_range(val_range: IntRange, layer: list[MapOp]) -> list[IntRan
 
     for i in range(len(layer)):
         op = layer[i]
-        if val_range.get_overlapping(layer[i].src_range) is not None:
+        if val_range.join(layer[i].src_range) is not None:
             first = i
             break
 
     for i in range(len(layer) - 1, -1, -1):
         op = layer[i]
-        if val_range.get_overlapping(layer[i].src_range) is not None:
+        if val_range.join(layer[i].src_range) is not None:
             last = i
             break
 
@@ -117,7 +102,7 @@ def apply_layer_to_range(val_range: IntRange, layer: list[MapOp]) -> list[IntRan
 
     for i in range(first, last + 1):
         op = layer[i]
-        overlap_range = val_range.get_overlapping(op.src_range)
+        overlap_range = val_range.join(op.src_range)
         if overlap_range is None:
             continue
         overlap_ranges.append(overlap_range)
@@ -125,22 +110,22 @@ def apply_layer_to_range(val_range: IntRange, layer: list[MapOp]) -> list[IntRan
         res.append(res_range)
 
     for j in range(len(overlap_ranges) - 1):
-        gap = overlap_ranges[j].get_gap_range(overlap_ranges[j + 1])
+        gap = get_gap_range(overlap_ranges[j], overlap_ranges[j + 1])
         if gap is None:
             continue
         res.append(gap)
 
-    if val_range.start < overlap_ranges[0].start:
+    if val_range.low < overlap_ranges[0].low:
         res.append(
-            IntRange(
-                start=val_range.start, len=overlap_ranges[0].start - val_range.start
+            IntRange.from_len(
+                low=val_range.low, len=overlap_ranges[0].low - val_range.low
             )
         )
-    if overlap_ranges[-1].end < val_range.end:
+    if overlap_ranges[-1].high < val_range.high:
         res.append(
-            IntRange(
-                start=overlap_ranges[-1].end + 1,
-                len=val_range.end - overlap_ranges[-1].end,
+            IntRange.from_len(
+                low=overlap_ranges[-1].high + 1,
+                len=val_range.high - overlap_ranges[-1].high,
             )
         )
 
@@ -154,7 +139,7 @@ def map_range(val_range: IntRange, layers: list[list[MapOp]]) -> list[IntRange]:
         for vrange in vranges:
             new_vranges.extend(apply_layer_to_range(vrange, layer))
         vranges = new_vranges
-    vranges.sort(key=lambda int_range: int_range.start)
+    vranges.sort(key=lambda int_range: int_range.low)
     return vranges
 
 
@@ -177,8 +162,8 @@ def part2(input: str) -> int:
     result_ranges = []
     for seed_range in seed_ranges:
         result_ranges.extend(map_range(seed_range, layers))
-    result_ranges.sort(key=lambda int_range: int_range.start)
-    return result_ranges[0].start
+    result_ranges.sort(key=lambda int_range: int_range.low)
+    return result_ranges[0].low
 
 
 def part2_stupid(input: str) -> int:
@@ -188,7 +173,7 @@ def part2_stupid(input: str) -> int:
     ans = int(1e9)
 
     for seed_range in seed_ranges:
-        for seed in range(seed_range.start, seed_range.end + 1):
+        for seed in range(seed_range.low, seed_range.high + 1):
             result = map_result(seed, layers)
             ans = min(ans, result)
 
