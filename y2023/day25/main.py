@@ -17,9 +17,9 @@ from aoclib.util import read_file
 
 
 def parse_line(line: str) -> tuple[str, Sequence[str]]:
-    parts = list(map(lambda _: _.strip(), line.split(": ")))
+    parts = list(map(str.strip, line.split(": ")))
     u = parts[0]
-    vs = list(map(lambda _: _.strip(), parts[1].split(" ")))
+    vs = list(map(str.strip, parts[1].split(" ")))
     return u, vs
 
 

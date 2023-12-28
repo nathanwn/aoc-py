@@ -12,7 +12,7 @@ def parse_round(round_input) -> tuple[int, int, int]:
     green = 0
     blue = 0
 
-    color_inputs = [_.strip() for _ in round_input.split(",")]
+    color_inputs = list(map(str.strip, round_input.split(",")))
     for color_input in color_inputs:
         num_input, color = color_input.split()
         num = int(num_input)
@@ -29,11 +29,12 @@ def parse_round(round_input) -> tuple[int, int, int]:
 
 
 def parse_game(line: str) -> list[tuple[int, int, int]]:
-    round_inputs = [_.strip() for _ in line.split(":")[1].strip().split(";")]
-    rounds = []
-    for round_input in round_inputs:
-        rounds.append(parse_round(round_input))
-    return rounds
+    return list(
+        map(
+            parse_round,
+            map(str.strip, line.split(":")[1].strip().split(";")),
+        ),
+    )
 
 
 def validate_game(game: list[tuple[int, int, int]]) -> bool:

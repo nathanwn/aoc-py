@@ -18,8 +18,8 @@ def score(win: list[int], have: list[int]) -> int:
 def parse_line(line: str) -> tuple[list[int], list[int]]:
     _, _, nums = line.partition(":")
     win_nums, _, have_nums = nums.partition("|")
-    win = list(map(lambda _: int(_), win_nums.strip().split()))
-    have = list(map(lambda _: int(_), have_nums.strip().split()))
+    win = list(map(int, win_nums.strip().split()))
+    have = list(map(int, have_nums.strip().split()))
     return win, have
 
 
