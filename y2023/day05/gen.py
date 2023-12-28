@@ -9,7 +9,7 @@ print("\n")
 
 for j in range(5):
     print("foo:")
-    s = set()
+    s: set[int] = set()
 
     while len(s) < 30:
         s.add(randint(1, 300))

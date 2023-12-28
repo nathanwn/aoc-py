@@ -3,14 +3,14 @@ from __future__ import annotations
 import argparse
 import os
 from collections.abc import Callable
+from fractions import Fraction
 from functools import partial
 
 import pytest
 import z3
 
-from aoclib.geometry.line import Line, RLine
-from aoclib.geometry.point import Point, RPoint
-from aoclib.geometry.rational import Rational
+from aoclib.geometry.line import Line
+from aoclib.geometry.point import Point
 from aoclib.util import read_file
 
 Coor3D = tuple[int, int, int]
@@ -82,13 +82,13 @@ def part1_rational(
     vs = []
     for line in input.splitlines():
         ui, vi = parse_line(line)
-        us.append(RPoint(x=Rational.from_int(ui[0]), y=Rational.from_int(ui[1])))
-        vs.append(RPoint(x=Rational.from_int(vi[0]), y=Rational.from_int(vi[1])))
+        us.append(Point(x=Fraction(ui[0]), y=Fraction(ui[1])))
+        vs.append(Point(x=Fraction(vi[0]), y=Fraction(vi[1])))
 
-    lines: list[RLine] = []
+    lines: list[Line] = []
 
     for i in range(len(us)):
-        lines.append(RLine.from_direction_and_point(v=vs[i], p=us[i]))
+        lines.append(Line.from_direction_and_point(v=vs[i], p=us[i]))
 
     ans = 0
 

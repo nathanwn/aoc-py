@@ -95,9 +95,18 @@ def part1_solve(steps: Sequence[Step]) -> int:
 
     # Get origin
     maybe_starts = []
-    dd = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-    for d in dd:
-        ss = Pos(origin.r + d[0], origin.c + d[1])
+    start_step_dirs: list[tuple[int, int]] = [
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+    ]
+    for step_dir in start_step_dirs:
+        ss = Pos(origin.r + step_dir[0], origin.c + step_dir[1])
         if g[ss.r][ss.c] == ".":
             maybe_starts.append(ss)
 
